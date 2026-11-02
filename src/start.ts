@@ -1,6 +1,14 @@
-import { createStart, createMiddleware } from "@tanstack/react-start";
-
+import {
+  createCsrfMiddleware,
+  createMiddleware,
+  createStart,
+} from "@tanstack/react-start";
+import { initializeGT, gtMiddleware } from "gt-tanstack-start";
+import gtConfig from "../gt.config.json";
+import loadTranslations from "./loadTranslations";
 import { renderErrorPage } from "./lib/error-page";
+
+initializeGT({ ...gtConfig, loadTranslations });
 
 const errorMiddleware = createMiddleware().server(async ({ next }) => {
   try {
@@ -17,6 +25,10 @@ const errorMiddleware = createMiddleware().server(async ({ next }) => {
   }
 });
 
+const csrfMiddleware = createCsrfMiddleware({
+  filter: ({ handlerType }) => handlerType === "serverFn",
+});
+
 export const startInstance = createStart(() => ({
-  requestMiddleware: [errorMiddleware],
+  requestMiddleware: [errorMiddleware, csrfMiddleware, gtMiddleware],
 }));

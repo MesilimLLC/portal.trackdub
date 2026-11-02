@@ -1,7 +1,14 @@
 import { QueryClient } from "@tanstack/react-query";
 import { createRouter } from "@tanstack/react-router";
+import { initializeGT } from "gt-react";
+import gtConfig from "../gt.config.json";
 import { routeTree } from "./routeTree.gen";
 import { ensureSession, invalidateSession } from "./lib/auth/ensure-session";
+import loadTranslations from "./loadTranslations";
+
+if (!import.meta.env.SSR) {
+  initializeGT({ ...gtConfig, loadTranslations });
+}
 
 /**
  * Router context exposed to `beforeLoad` and components.

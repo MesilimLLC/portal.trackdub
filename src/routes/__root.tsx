@@ -8,6 +8,8 @@ import {
   Scripts,
 } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
+import { GTProvider, getTranslationsSnapshot } from "gt-react";
+import gtConfig from "../../gt.config.json";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
@@ -102,6 +104,15 @@ export const Route = createRootRouteWithContext<{
       },
     ],
   }),
+  loader: async () => {
+    const locale = import.meta.env.SSR
+      ? (await import("gt-tanstack-start")).getLocale()
+      : gtConfig.defaultLocale;
+    return {
+      locale,
+      translations: await getTranslationsSnapshot(locale),
+    };
+  },
   shellComponent: RootShell,
   component: RootComponent,
   notFoundComponent: NotFoundComponent,
@@ -109,13 +120,17 @@ export const Route = createRootRouteWithContext<{
 });
 
 function RootShell({ children }: { children: ReactNode }) {
+  const { locale, translations } = Route.useLoaderData();
+
   return (
-    <html lang="en">
+    <html lang={locale}>
       <head>
         <HeadContent />
       </head>
       <body>
-        {children}
+        <GTProvider locale={locale} translations={translations}>
+          {children}
+        </GTProvider>
         <Scripts />
       </body>
     </html>
